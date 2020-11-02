@@ -6,8 +6,6 @@ import numpy as np
 import pandas as pd
 
 
-#==========================================================================
-#==========================================================================
 def initializeVars(weeks, parameters):
     '''
     Intitalized Vars for different studies
@@ -24,8 +22,6 @@ def initializeVars(weeks, parameters):
         Initialized parameters
     '''
 
-    parameters['usdPerCoin'] = 385.0 
-    print( 'Ehtereum Exchange Rate: ', parameters['usdPerCoin'])
     # Percent difficulty change in eth network per month
     parameters['blockTime']         = 15 
     parameters['networkDifficulty'] = 12.93*10**12
@@ -48,32 +44,42 @@ def initializeVars(weeks, parameters):
     weekToIcreaseDifficulty = range(0,weeks,1) # increase every week    
     networkHashrateTime[0:4] = parameters['networkHashrate'] # Initialize
 
-    # Can set the networkHR to increase at % weekly or as forecasted 
-    #increase = 'forecast'
-    increase = 'const'
-    parameters['deltaDifficulty']= 1.000
-    #parameters['deltaDifficulty']= 1.015
-    #parameters['deltaDifficulty']= 1.053
-
-    if increase=='const':
-        for i in weekToIcreaseDifficulty[1:]:
-            networkHashrateTime[i:i+4] = networkHashrateTime[i-1] * parameters['deltaDifficulty'] 
-    elif increase=='forecast':
-        # load the forecasted increase as 7 * nWeeks
-        dfHR=pd.read_csv('inputs/sigmaModel.csv')
-        dfHR.n=range(len(dfHR))
-        # Model begins at end of "TRUE" data
-        strt=len(dfHR.TRUE.dropna())
-        # Model ends 52 weeks later, HR model has daily accuarcy (convert to weeks)
-        networkHashrateTime = dfHR.Model2[strt:strt+7*52:7].values *10**9 #[Hs]
-
+    # Set the networkHR to increase at % weekly 
+    for i in weekToIcreaseDifficulty[1:]:
+        networkHashrateTime[i:i+4] = ( networkHashrateTime[i-1] 
+                                       * parameters['deltaDifficulty'] )
     parameters['networkHashrateTime'] = networkHashrateTime
 
     return parameters
 
 
-#==========================================================================
-#==========================================================================
+def GPUprice(dfETHPrice, GPUmodel):
+    '''
+    Calculates GPU price based on price of ETH
+    
+    Parameters
+    ----------
+    dfETHPrice: DataFrame
+        DataFrame of Prices
+    GPUmodel: 
+        linear regression model of GPU price wrt ETH price
+    Returns
+    -------
+    dfGPUPrice: DataFrame
+        DataFrame with GPU Price
+    '''        
+    idx = range(len(dfETHprice))
+    # Ethereum low, med, high prices 
+    low = pd.DataFrame({'eth': dfETHprice.F }, index=idx ) 
+    mid = pd.DataFrame({'eth': dfETHprice.Flow }, index=idx ) 
+    high= pd.DataFrame({'eth': dfETHprice.Fhigh }, index=idx )
+    # GPU low, med, high prices 
+    dfETHPrice['GPUlow'] = GPUmodel.predict(low)
+    dfETHPrice['GPUmid'] = GPUmodel.predict(mid)
+    dfETHPrice['GPUhigh'] = GPUmodel.predict(high)
+    return dfGPUPrice
+
+
 def userBlockTime(userHashrate, networkHashrate, blockTime):
     '''
     Update network hashrate
