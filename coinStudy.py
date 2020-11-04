@@ -64,7 +64,7 @@ del networkHash['UnixTimeStamp']
 networkHash['200DAvg'] = networkHash.rolling('200d').mean()
 deltaDifficultyMin = 1+networkHash['200DAvg'].pct_change(periods=7).dropna()[50:].min()
 deltaDifficultyMean = 1+networkHash['200DAvg'].pct_change(periods=7).dropna()[50:].mean()
-import ipdb; ipdb.set_trace()
+#import ipdb; ipdb.set_trace()
 # Overwrite/ hardcode to persios study % increace
 deltaDifficultyMin = 1.015
 deltaDifficultyMean =1.053
